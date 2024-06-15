@@ -1,0 +1,17 @@
+version: "3.4"
+
+services:
+  mssql: 
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Password123"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    restart: always
+   
+networks:
+  default:    
+    name: eventsourcingnetwork
+    external: true
