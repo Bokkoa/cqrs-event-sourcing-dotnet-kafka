@@ -1,7 +1,7 @@
 using CQRS.Core.Events;
 
-namespace Post.Common.Events
-{
+namespace Post.Common.Events;
+
   public class PostCreatedEvent: BaseEvent {
     public PostCreatedEvent(): base(nameof(PostCreatedEvent)) { }
 
@@ -11,4 +11,3 @@ namespace Post.Common.Events
     public DateTime DatePosted { get; set; }
   
   }
-}
