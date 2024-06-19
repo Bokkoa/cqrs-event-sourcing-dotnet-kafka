@@ -4,7 +4,7 @@ namespace Post.Common.Events
 {
     public class CommentUpdatedEvent: BaseEvent
     {
-        protected CommentUpdatedEvent(): base(nameof(CommentUpdatedEvent)){}
+        public CommentUpdatedEvent(): base(nameof(CommentUpdatedEvent)){}
 
         public Guid CommentId { get; set; }
         public string Comment { get; set; }
