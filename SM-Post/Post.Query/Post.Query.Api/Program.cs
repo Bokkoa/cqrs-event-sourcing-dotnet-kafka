@@ -13,9 +13,18 @@ using Post.Query.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Multi DB configuration
+Action<DbContextOptionsBuilder> configureDbContext;
+var env =  Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-// Add DB context
-Action<DbContextOptionsBuilder> configureDbContext = o => o.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+if(env.Equals("Development.PostgreSQL")){
+    // Add DB context Postgresql
+    configureDbContext = o => o.UseLazyLoadingProxies().UseNpgsql(builder.Configuration.GetConnectionString("SqlServer"));
+} else {
+    // Add DB context SQL SERVER
+   configureDbContext = o => o.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+}
+
 builder.Services.AddDbContext<DatabaseContext>(configureDbContext);
 builder.Services.AddSingleton<DatabaseContextFactory>(new DatabaseContextFactory(configureDbContext));
 
@@ -40,13 +49,17 @@ dispatcher.RegisterHandler<FindAllPostQuery>(queryHandler.HandleAsync);
 dispatcher.RegisterHandler<FindPostByIdQuery>(queryHandler.HandleAsync);
 dispatcher.RegisterHandler<FindPostByAuthorQuery>(queryHandler.HandleAsync);
 dispatcher.RegisterHandler<FindPostWithCommentsQuery>(queryHandler.HandleAsync);
-dispatcher.RegisterHandler<FindPostWithLikesQuery>(queryHandler.HandleAsync);
+dispatcher.RegisterHandler<FindPostsWithLikesQuery>(queryHandler.HandleAsync);
+
 builder.Services.AddSingleton<IQueryDispatcher<PostEntity>>( _ => dispatcher);
 
 // kafka consumer
 builder.Services.Configure<ConsumerConfig>(builder.Configuration.GetSection(nameof(ConsumerConfig)));
 builder.Services.AddScoped<IEventConsumer, EventConsumer>();
 builder.Services.AddHostedService<ConsumerHostedService>();
+
+
+// 
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

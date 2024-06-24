@@ -25,31 +25,13 @@ namespace Post.Query.Api.Controllers
         {
             try
             {
-
                 var posts = await _queryDispatcher.SendAsync(new FindAllPostQuery());
-
-                if (posts == null || !posts.Any())
-                {
-                    return NoContent();
-                }
-
-                var count = posts.Count;
-
-                return Ok(new PostLookupResponse
-                {
-                    Posts = posts,
-                    Message = $"Successfully returned {count} post{(count > 1 ? "s" : string.Empty)}"
-                });
+                return NormalResponse(posts);
             }
             catch (Exception ex)
             {
                 const string SAFE_ERROR_MESSAGE = "Error while processing request to retrieve all posts!";
-                _logger.LogError(ex, SAFE_ERROR_MESSAGE);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, new BaseResponse
-                {
-                    Message = SAFE_ERROR_MESSAGE,
-                });
+                return ErrorMethod(ex, SAFE_ERROR_MESSAGE);
             }
         }
 
@@ -75,13 +57,86 @@ namespace Post.Query.Api.Controllers
             catch (Exception ex)
             {
                 const string SAFE_ERROR_MESSAGE = "Error while processing request to retrieve post by id!";
-                _logger.LogError(ex, SAFE_ERROR_MESSAGE);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, new BaseResponse
-                {
-                    Message = SAFE_ERROR_MESSAGE,
-                });
+                return ErrorMethod(ex, SAFE_ERROR_MESSAGE);
             }
         }
+
+        [HttpGet("byAuthor/{author}")]
+        public async Task<ActionResult> GetPostsByAuthorAsync(string author)
+        {
+            try
+            {
+                var posts = await _queryDispatcher.SendAsync(new FindPostByAuthorQuery { Author = author });
+                return NormalResponse(posts);
+
+            }
+            catch (Exception ex)
+            {
+
+                const string SAFE_ERROR_MESSAGE = "Error while processing request to find post by author!";
+                return ErrorMethod(ex, SAFE_ERROR_MESSAGE);
+            }
+        }
+
+
+        [HttpGet("withComments")]
+        public async Task<ActionResult> GetPostsWithCommentsAsync(string author)
+        {
+            try
+            {
+
+                var posts = await _queryDispatcher.SendAsync(new FindPostWithCommentsQuery());
+                return NormalResponse(posts);
+            }
+            catch (Exception ex)
+            {
+                const string SAFE_ERROR_MESSAGE = "Error while processing request to find post with comments!";
+                return ErrorMethod(ex, SAFE_ERROR_MESSAGE);
+            }
+        }
+
+        
+        [HttpGet("withLikes/{numberOfLikes}")]
+        public async Task<ActionResult> GetPostsWithLikesAsync(int numberOfLikes)
+        {
+            try
+            {
+                var posts = await _queryDispatcher.SendAsync(new FindPostsWithLikesQuery{ NumberOfLikes = numberOfLikes});
+                return NormalResponse(posts);
+            }
+            catch (Exception ex)
+            {
+                const string SAFE_ERROR_MESSAGE = "Error while processing request to find post with likes!";
+                return ErrorMethod(ex, SAFE_ERROR_MESSAGE);
+            }
+        }
+
+        private ActionResult NormalResponse(List<PostEntity> posts)
+        {
+            if (posts == null || !posts.Any())
+            {
+                return NoContent();
+            }
+
+            var count = posts.Count;
+
+            return Ok(new PostLookupResponse
+            {
+                Posts = posts,
+                Message = $"Successfully returned {count} post{(count > 1 ? "s" : string.Empty)}"
+            });
+        }
+
+
+        private ActionResult ErrorMethod(Exception ex, string safeErrorMessage)
+        {
+            _logger.LogError(ex, safeErrorMessage);
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new BaseResponse
+            {
+                Message = safeErrorMessage,
+            });
+        }
+
     }
 }
