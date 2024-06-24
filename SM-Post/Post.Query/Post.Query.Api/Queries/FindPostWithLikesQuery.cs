@@ -8,6 +8,6 @@ namespace Post.Query.Api.Queries
 {
     public class FindPostWithLikesQuery  : BaseQuery
     {
-        public int NumberOfLiker {get; set;}
+        public int NumberOfLikes {get; set;}
     }
 }
