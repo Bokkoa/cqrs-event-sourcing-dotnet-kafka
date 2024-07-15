@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_PASSWORD: "postgresPsw"
     ports:
-      - "432:5432"
+      - "5432:5432"
     restart: always
     volumes:
       - "postgresql_data:/var/lib/postgresql/data"
